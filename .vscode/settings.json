@@ -1,0 +1,7 @@
+{
+    "files.associations": {
+        "api.h": "c",
+        "randombytes.h": "c",
+        "symmetric.h": "c"
+    }
+}
