@@ -2,6 +2,7 @@
     "files.associations": {
         "api.h": "c",
         "randombytes.h": "c",
-        "symmetric.h": "c"
+        "symmetric.h": "c",
+        "ml_crypto.h": "c"
     }
 }
