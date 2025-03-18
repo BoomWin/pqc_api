@@ -19,7 +19,7 @@ int ml_kem_768_decaps(uint8_t *ss, const uint8_t *ct, const uint8_t *sk);
 // ML-KEM-1024
 int ml_kem_1024_keypair_gen(uint8_t *pk, uint8_t *sk);
 int ml_kem_1024_encaps(uint8_t *ct, uint8_t *ss, const uint8_t *pk);
-int ml_kem_1024_encaps(uint8_t *ss, const uint8_t *ct, const uint8_t *sk);
+int ml_kem_1024_decaps(uint8_t *ss, const uint8_t *ct, const uint8_t *sk);
 
 /* ML-DSA Functions */
 // ML-DSA-44
