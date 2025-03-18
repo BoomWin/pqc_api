@@ -14,8 +14,13 @@ int ml_kem_512_keypair_gen(uint8_t *pk, uint8_t *sk) {
 }
 
 int ml_kem_512_encaps(uint8_t *ct, uint8_t *ss, const uint8_t *pk) {
-    return PQCLEAN 이어서 ㄱㄱ 원래 함수보고
+    return PQCLEAN_MLKEM512_CLEAN_crypto_kem_enc(ct, ss, pk);
 }
+
+int ml_kem_512_decaps(uint8_t *ss, const uint8_t *ct, const uint8_t *sk) {
+    return PQCLEAN_MLKEM512_CLEAN_crypto_kem_dec(ss, ct, sk);
+} 
+
 
 /*
 16진수로 출력 함수
