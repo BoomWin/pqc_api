@@ -19,28 +19,15 @@ static void printbytes(const uint8_t *x, size_t xlen) {
     printf("\n");
 }
 
-// 함수 구현부
-// void randombytes(uint8_t *mi, int i) {
-//     // 첫 호출 시 난수 생성기 초기화
-//     static int initialized = 0;
-//     if (!initialized) {
-//         srand((unsigned int)time(NULL));
-//         initialized = 1;
-//     }
-    
-//     // i 길이만큼 랜덤 바이트 생성
-//     for (int j = 0; j < i; j++) {
-//         mi[j] = (uint8_t)(rand() % 256);
-//     }
-// }
-
-
 int main() {
     // 셀렉옵션으로 선택된 값에 한하여 수행.
     //  그냥 지금 정의해서 웹에서도 그 번호를 보내는 형태로 구현하자
     int select = 0;
     printf(" (1) ml-kem-512, (2) ml-kem-768, (3) ml-kem-1024\n");
     printf(" (4) ml-dsa-44,  (5) ml-dsa-65,  (6) ml-dsa-87 \n");
+    printf(" (7)  sphincs-sha2-128f,  (8)  sphincs-sha2-128s\n");
+    printf(" (9)  sphincs-sha2-192f,  (10) sphincs-sha2-192s\n");
+    printf(" (11) sphincs-sha2-256f,  (12) sphincs-sha2-256s\n ");
     // 옵션 떄문에 리턴처리 안해주면 오류 정상 반환 값이 1
     if (scanf("%d", &select) != 1) {
         printf("입력 오류 \n");
@@ -182,7 +169,7 @@ int main() {
             ml_dsa_44_sign_message(sm, &smlen, mi, i, sk);
             ml_dsa_44_sign(sig, &siglen, mi, i, sk);
 
-            printf( " Signature + Message : ");
+            printf(" Signature + Message : ");
             printbytes(sm, smlen);
             printf(" Signature ");
             printbytes(sig, siglen);
@@ -196,7 +183,7 @@ int main() {
             }
             for (k = 0; k < i; k++) {
                 if (sm[k] != mi[k]) {
-                    printf("ERROR : Message Recovery Failed\n");
+                    printf(" ERROR : Message Recovery Failed\n");
                     return -1;
                 }
             }
@@ -254,11 +241,11 @@ int main() {
             
             for (k = 0; k < i; k++) {
                 if (sm[k] != mi[k]) {
-                    printf("ERROR : Message Recovery Failed\n");
+                    printf(" ERROR : Message Recovery Failed\n");
                     return -1;
                 }
             }
-            printf("Message Recocvery Success \n");
+            printf(" Message Recocvery Success \n");
             printf(" SM (과정 수행후 메시지만 남음) : ");
             printbytes(sm, smlen);
 
@@ -314,6 +301,108 @@ int main() {
             for (k = 0; k < i; k++) {
                 if (sm[k] != mi[k]) {
                     printf("ERROR : message recovery failed\n");
+                    return -1;
+                }
+            }
+            printf("SUCCESS\n");
+        }
+    }
+    else if(select == 7) {
+        uint8_t sk[SPHINCS_SHA2_128F_SECRET_KEY_BYTES];
+        uint8_t pk[SPHINCS_SHA2_128F_PUBLIC_KEY_BYTES];
+
+        uint8_t mi[MAXLEN];
+        uint8_t sm[MAXLEN + SPHINCS_SHA2_128F_SIGNATURE_BYTES];
+        uint8_t sig[SPHINCS_SHA2_128F_SIGNATURE_BYTES];
+
+        size_t smlen;
+        size_t siglen;
+        size_t mlen;
+
+        int r;
+        size_t i, k;
+
+        /* 0 , 1, 4, 16, 64, 256, 1024로 테스트 */
+        for(i = 0; i < MAXLEN; i = (i == 0) ? i + 1 : i << 2) {
+            randombytes(mi, i);
+            printf("Original Message : ");
+            printbytes(mi, i);
+
+            // 키 생성
+            sphincs_sha2_128f_keypair(pk, sk);
+            printf("Public Key : ");
+            printbytes(pk, SPHINCS_SHA2_128F_PUBLIC_KEY_BYTES);
+            printf("Secret Key : ");
+            printbytes(sk, SPHINCS_SHA2_128F_SECRET_KEY_BYTES);
+
+            sphincs_sha2_128f_sign_message(sm, &smlen, mi, i, sk);
+            sphincs_sha2_128f_signature(sig, &siglen, mi, i, sk);
+
+            printf("SIGNATURE + MESSAGE : ");
+            printbytes(sm, smlen);
+            printf("ONLY SIGNATURE : ");
+            printbytes(sig, siglen);
+
+            r = sphincs_sha2_128f_open_message(sm, &mlen, sm, smlen, pk);
+            r |= sphincs_sha2_128f_verify(sig, siglen, mi, i, pk);
+
+            if (r) {
+                printf("ERORR : Signature Verification Failed\n");
+                return -1;
+            }
+            for (k = 0; k < i; k++) {
+                if (sm[k] != mi[k]) {
+                    printf("ERROR : Message Recovery Failed\n");
+                    return -1;
+                }
+            }
+        }
+    }
+    else if (select == 8) {
+        uint8_t sk[SPHINCS_SHA2_128S_SECRET_KEY_BYTES];
+        uint8_t pk[SPHINCS_SHA2_128S_PUBLIC_KEY_BYTES];
+
+        uint8_t mi[MAXLEN];
+        uint8_t sm[MAXLEN + SPHINCS_SHA2_128S_SIGNATURE_BYTES];
+        uint8_t sig[SPHINCS_SHA2_128S_SIGNATURE_BYTES];
+
+        size_t smlen;
+        size_t siglen;
+        size_t mlen;
+
+        int r;
+        size_t i, k;
+
+        /* 0 , 1, 4, 16, 64, 256, 1024로 테스트 */
+        for(i = 0; i < MAXLEN; i = (i == 0) ? i + 1 : i << 2) {
+            randombytes(mi, i);
+            printf("Original Message : ");
+            printbytes(mi, i);
+
+            sphincs_sha2_128s_keypair(pk, sk);
+            printf("Public Key : ");
+            printbytes(pk, SPHINCS_SHA2_128S_PUBLIC_KEY_BYTES);
+            printf("Secret Key : ");
+            printbytes(sk, SPHINCS_SHA2_128S_SECRET_KEY_BYTES);
+
+            sphincs_sha2_128s_sign_message(sm, &smlen, mi, i, sk);
+            sphincs_sha2_128s_signature(sig, &siglen, mi, i, sk);
+
+            printf("SIGNATURE + MESSAGE : ");
+            printbytes(sm, smlen);
+            printf("ONLY SIGNATURE : ");
+            printbytes(sig, siglen);
+
+            r = sphincs_sha2_128s_open_message(sm, &mlen, sm, smlen, pk);
+            r |= sphincs_sha2_128s_verify(sig, siglen, mi, i, pk);      
+
+            if (r) {
+                printf("ERROR : Signature Verification Failed\n");
+                return -1;
+            }
+            for (k = 0; k < i; k++) {
+                if (sm[k] != mi[k]) {
+                    printf("ERROR : Message Recovery Failed\n");
                     return -1;
                 }
             }

@@ -4,7 +4,7 @@
 #include <stdint.h>
 #include <stddef.h>
 
-
+/* ===================================================  */
 /* ML-KEM Functions */
 // ML-KEM-512
 int ml_kem_512_keypair_gen(uint8_t *pk, uint8_t *sk);
@@ -69,6 +69,65 @@ int ml_dsa_87_open_message(uint8_t *m, size_t *mlen,
                           const uint8_t *sm, size_t smlen,
                           const uint8_t *pk);
 /* ===================================================  */
+/* SPHINCS+-SHA2-128f-simple */
+
+/* Format sk: [SK_SEED || SK_PRF || PUB_SEED || root]
+ * Format pk: [root || PUB_SEED] */
+
+// Key generation with seed
+int sphincs_sha2_128f_seed_keypair(uint8_t *pk, uint8_t *sk, const uint8_t *seed);
+
+// Standard Key Generation
+int sphincs_sha2_128f_keypair(uint8_t *pk, uint8_t *sk);
+
+// Detached Signature Generation
+int sphincs_sha2_128f_signature(uint8_t *sig, size_t *siglen,
+                                const uint8_t *m, size_t mlen,
+                                const uint8_t *sk);
+
+// Combined Signature and Message
+int sphincs_sha2_128f_sign_message(uint8_t *sm, size_t *smlen,
+                                    const uint8_t *m, size_t mlen,
+                                    const uint8_t *sk);
+
+// Detached Signature Verification
+int sphincs_sha2_128f_verify(const uint8_t *sig, size_t siglen,
+                            const uint8_t *m, size_t mlen,
+                            const uint8_t *pk);
+
+// Verify And Extract Message
+int sphincs_sha2_128f_open_message(uint8_t *m, size_t *mlen,
+                                    const uint8_t *sm, size_t smlen,
+                                    const uint8_t *pk);
+
+/* SPHINCS+-SHA2-128s-simple */
+int sphincs_sha2_128s_seed_keypair(uint8_t *pk, uint8_t *sk, const uint8_t *seed);
+
+int sphincs_sha2_128s_keypair(uint8_t *pk, uint8_t *sk);
+
+// 서명 부분
+int sphincs_sha2_128s_sign_message(uint8_t *sm, size_t *smlen,
+                                  const uint8_t *m, size_t mlen,
+                                  const uint8_t *sk);
+int sphincs_sha2_128s_signature(uint8_t *sig, size_t *siglen,
+                               const uint8_t *m, size_t mlen,
+                               const uint8_t *sk);
+// 검증 부분
+int sphincs_sha2_128s_verify(const uint8_t *sig, size_t siglen,
+                            const uint8_t *m, size_t mlen,
+                            const uint8_t *pk);
+
+int sphincs_sha2_128s_open_message(uint8_t *m, size_t *mlen,
+                                  const uint8_t *sm, size_t smlen,
+                                  const uint8_t *pk);
+
+
+
+
+
+
+
+/* ===================================================  */
 #define NTESTS 5
 /* ===================================================  */
 /* Key sizes and other constants */
@@ -112,6 +171,20 @@ int ml_dsa_87_open_message(uint8_t *m, size_t *mlen,
 #define ML_DSA_87_SIGNATURE_BYTES   4627
 #define ML_DSA_87_MAX_SIGNATURE_BYTES (ML_DSA_87_SIGNATURE_BYTES + MAXLEN)
 /* ===================================================  */
+
+/* ===================================================  */
+/* SPHINCS+-SHA2-128f-simple */
+#define SPHINCS_SHA2_128F_PUBLIC_KEY_BYTES 32
+#define SPHINCS_SHA2_128F_SECRET_KEY_BYTES 64
+#define SPHINCS_SHA2_128F_SIGNATURE_BYTES 17088
+/* SPHINCS+-SHA2-128s-simple */
+#define SPHINCS_SHA2_128S_PUBLIC_KEY_BYTES 32
+#define SPHINCS_SHA2_128S_SECRET_KEY_BYTES 64
+#define SPHINCS_SHA2_128S_SIGNATURE_BYTES 7856
+
+
+/* ===================================================  */
+
 
 
 #endif
