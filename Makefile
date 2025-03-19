@@ -14,6 +14,10 @@ ML_DSA_65_DIR = ml-dsa-65/clean
 ML_DSA_87_DIR = ml-dsa-87/clean
 SPHINCS_SHA2_128f_DIR = sphincs-sha2-128f-simple/clean
 SPHINCS_SHA2_128s_DIR = sphincs-sha2-128s-simple/clean
+SPHINCS_SHA2_192f_DIR = sphincs-sha2-192f-simple/clean
+SPHINCS_SHA2_192s_DIR = sphincs-sha2-192s-simple/clean
+
+
 
 # 라이브러리 파일
 ML_KEM_512_LIB = $(ML_KEM_512_DIR)/libml-kem-512_clean.a
@@ -24,6 +28,8 @@ ML_DSA_65_LIB = $(ML_DSA_65_DIR)/libml-dsa-65_clean.a
 ML_DSA_87_LIB = $(ML_DSA_87_DIR)/libml-dsa-87_clean.a
 SPHINCS_SHA2_128f_LIB = $(SPHINCS_SHA2_128f_DIR)/libsphincs-sha2-128f-simple_clean.a
 SPHINCS_SHA2_128s_LIB = $(SPHINCS_SHA2_128s_DIR)/libsphincs-sha2-128s-simple_clean.a
+SPHINCS_SHA2_192f_LIB = $(SPHINCS_SHA2_192f_DIR)/libsphincs-sha2-192f-simple_clean.a
+SPHINCS_SHA2_192s_LIB = $(SPHINCS_SHA2_192s_DIR)/libsphincs-sha2-192s-simple_clean.a
 
 # 공통 오브젝트 파일
 COMMON_OBJS = $(COMMON_DIR)/fips202.o $(COMMON_DIR)/randombytes.o $(COMMON_DIR)/sha2.o
@@ -64,6 +70,12 @@ $(SPHINCS_SHA2_128f_LIB):
 # SPHINCS-SHA2-128(small)라이브러리 빌드
 $(SPHINCS_SHA2_128s_LIB):
 	$(MAKE) -C $(SPHINCS_SHA2_128s_DIR)
+# SPHINCS+ SHA2-192(fast)라이브러리 빌드
+$(SPHINCS_SHA2_192f_LIB):
+	$(MAKE) -C $(SPHINCS_SHA2_192f_DIR)
+# SPHINCS+ SHA2-192(small)라이브러리 빌드
+$(SPHINCS_SHA2_192s_LIB):
+	$(MAKE) -C $(SPHINCS_SHA2_192s_DIR)
 
 # 공통 오브젝트 파일 빌드
 $(COMMON_DIR)/fips202.o: $(COMMON_DIR)/fips202.c
@@ -91,6 +103,8 @@ $(TEST_PROG): $(COMMON_OBJS) $(MAIN_OBJS) $(ML_KEM_512_LIB) $(ML_KEM_768_LIB) $(
 		$(ML_DSA_87_LIB) \
 		$(SPHINCS_SHA2_128f_LIB) \
 		$(SPHINCS_SHA2_128s_LIB) \
+		$(SPHINCS_SHA2_192f_LIB) \
+		$(SPHINCS_SHA2_192s_LIB) \
 		$(INCLUDES)
 
 clean:
@@ -103,6 +117,8 @@ clean:
 	$(MAKE) -C $(ML_DSA_87_DIR) clean
 	$(MAKE) -C $(SPHINCS_SHA2_128f_DIR) clean
 	$(MAKE) -C $(SPHINCS_SHA2_128s_DIR) clean
+	$(MAKE) -C $(SPHINCS_SHA2_192f_DIR) clean
+	$(MAKE) -C $(SPHINCS_SHA2_192s_DIR) clean
 
 
 .PHONY: all clean

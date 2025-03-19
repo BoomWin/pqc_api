@@ -122,7 +122,31 @@ int sphincs_sha2_128s_open_message(uint8_t *m, size_t *mlen,
                                   const uint8_t *pk);
 
 
+/* SPHINCS+-SHA2-192f-simple */
+int sphincs_sha2_192f_seed_keypair(uint8_t *pk, uint8_t *sk, const uint8_t *seed);
 
+int sphincs_sha2_192f_keypair(uint8_t *pk, uint8_t *sk);
+
+// 서명 부분 구현
+int sphincs_sha2_192f_sign_message(uint8_t *sm, size_t *smlen,
+                                    const uint8_t *m, size_t mlen,
+                                    const uint8_t *sk);
+int sphincs_sha2_192f_signature(uint8_t *sig, size_t *siglen,
+                                const uint8_t *m, size_t mlen,
+                                const uint8_t *sk);
+
+// 검증 부분 구현
+int sphincs_sha2_192f_verify(const uint8_t *sig, size_t siglen,
+                                const uint8_t *m, size_t mlen,
+                                const uint8_t *pk);
+int sphincs_sha2_192f_open_message(uint8_t *m, size_t *mlen,
+                                    const uint8_t *sm, size_t smlen,
+                                    const uint8_t *pk);
+
+/* SPHINCS+-SHA2-192s-simple */
+
+
+    
 
 
 
@@ -177,10 +201,21 @@ int sphincs_sha2_128s_open_message(uint8_t *m, size_t *mlen,
 #define SPHINCS_SHA2_128F_PUBLIC_KEY_BYTES 32
 #define SPHINCS_SHA2_128F_SECRET_KEY_BYTES 64
 #define SPHINCS_SHA2_128F_SIGNATURE_BYTES 17088
+
 /* SPHINCS+-SHA2-128s-simple */
 #define SPHINCS_SHA2_128S_PUBLIC_KEY_BYTES 32
 #define SPHINCS_SHA2_128S_SECRET_KEY_BYTES 64
 #define SPHINCS_SHA2_128S_SIGNATURE_BYTES 7856
+
+/* SPHINCS+ SHA2-192f-simple */
+#define SPHINCS_SHA2_192F_PUBLIC_KEY_BYTES 48
+#define SPHINCS_SHA2_192F_SECRET_KEY_BYTES 96
+#define SPHINCS_SHA2_192F_SIGNATURE_BYTES 35664
+
+/* SPHINCS+ SHA2-192s-simple */
+#define SPHINCS_SHA2_192S_PUBLIC_KEY_BYTES 48
+#define SPHINCS_SHA2_192S_SECRET_KEY_BYTES 96
+#define SPHINCS_SHA2_192S_SIGNATURE_BYTES 16224
 
 
 /* ===================================================  */

@@ -409,6 +409,57 @@ int main() {
             printf("SUCCESS\n");
         }
     }
+    else if (select == 9) {
+        uint8_t sk[SPHINCS_SHA2_192F_SECRET_KEY_BYTES];
+        uint8_t pk[SPHINCS_SHA2_192F_PUBLIC_KEY_BYTES];
+
+        uint8_t mi[MAXLEN];
+        uint8_t sm[MAXLEN + SPHINCS_SHA2_192F_SIGNATURE_BYTES];
+        uint8_t sig[SPHINCS_SHA2_192F_SIGNATURE_BYTES];
+
+        size_t smlen;
+        size_t siglen;
+        size_t mlen;
+
+        int r;
+        size_t i, k;
+
+        /* 0 , 1, 4, 16, 64, 256, 1024로 테스트 */
+        for(i = 0; i < MAXLEN; i = (i == 0) ? i + 1 : i << 2) {
+            randombytes(mi, i);
+            printf("Original Message : ");
+            printbytes(mi, i);
+
+            sphincs_sha2_192f_keypair(pk, sk);
+            printf("Public Key : ");
+            printbytes(pk, SPHINCS_SHA2_192F_PUBLIC_KEY_BYTES);
+            printf("Secret Key : ");
+            printbytes(sk, SPHINCS_SHA2_192F_SECRET_KEY_BYTES);
+
+            sphincs_sha2_192f_sign_message(sm, &smlen, mi, i, sk);
+            sphincs_sha2_192f_signature(sig, &siglen, mi, i, sk);
+
+            printf("SIGNATURE + MESSAGE : ");
+            printbytes(sm, smlen);
+            printf("ONLY SIGNATURE : ");
+            printbytes(sig, siglen);
+
+            r = sphincs_sha2_192f_open_message(sm, &mlen, sm, smlen, pk);
+            r |= sphincs_sha2_192f_verify(sig, siglen, mi, i, pk);
+
+            if (r) {
+                printf("ERROR : Signature Verification Failed\n");
+                return -1;
+            }
+            for (k = 0; k < i; k++) {
+                if (sm[k] != mi[k]) {
+                    printf("ERROR : Message Recovery Failed\n");
+                    return -1;
+                }
+            }
+            printf("SUCCESS\n");
+        }
+    }
 
     return 0;
 }

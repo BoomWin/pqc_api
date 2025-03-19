@@ -9,6 +9,8 @@
 
 #include "./sphincs-sha2-128f-simple/clean/api.h"
 #include "./sphincs-sha2-128s-simple/clean/api.h"
+#include "./sphincs-sha2-192f-simple/clean/api.h"
+
 /* ======================================================================== */
 /* ML-KEM-512 implementations */
 int ml_kem_512_keypair_gen(uint8_t *pk, uint8_t *sk) {
@@ -213,6 +215,43 @@ int sphincs_sha2_128s_open_message(uint8_t *m, size_t *mlen,
                                   const uint8_t *pk) {
     return PQCLEAN_SPHINCSSHA2128SSIMPLE_CLEAN_crypto_sign_open(m, mlen, sm, smlen, pk);
 }
+
+
+/* SPHINCS+-SHA2-192f-simple implementations */
+int sphincs_sha2_192f_seed_keypair(uint8_t *pk, uint8_t *sk, const uint8_t *seed) {
+    return PQCLEAN_SPHINCSSHA2192FSIMPLE_CLEAN_crypto_sign_seed_keypair(pk, sk, seed);
+}
+
+int sphincs_sha2_192f_keypair(uint8_t *pk, uint8_t *sk) {
+    return PQCLEAN_SPHINCSSHA2192FSIMPLE_CLEAN_crypto_sign_keypair(pk, sk);
+}
+
+int sphincs_sha2_192f_sign_message(uint8_t *sm, size_t *smlen,
+                                  const uint8_t *m, size_t mlen,
+                                  const uint8_t *sk) {
+    return PQCLEAN_SPHINCSSHA2192FSIMPLE_CLEAN_crypto_sign(sm, smlen, m, mlen, sk);
+}
+
+int sphincs_sha2_192f_signature(uint8_t *sig, size_t *siglen,
+                               const uint8_t *m, size_t mlen,
+                               const uint8_t *sk) {
+    return PQCLEAN_SPHINCSSHA2192FSIMPLE_CLEAN_crypto_sign_signature(sig, siglen, m, mlen, sk);
+}   
+
+int sphincs_sha2_192f_verify(const uint8_t *sig, size_t siglen,
+                            const uint8_t *m, size_t mlen,
+                            const uint8_t *pk   ) {
+    return PQCLEAN_SPHINCSSHA2192FSIMPLE_CLEAN_crypto_sign_verify(sig, siglen, m, mlen, pk);
+}
+
+int sphincs_sha2_192f_open_message(uint8_t *m, size_t *mlen,
+                                  const uint8_t *sm, size_t smlen,
+                                  const uint8_t *pk) {
+    return PQCLEAN_SPHINCSSHA2192FSIMPLE_CLEAN_crypto_sign_open(m, mlen, sm, smlen, pk);
+}
+
+
+
 
 
 
