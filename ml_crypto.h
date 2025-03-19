@@ -69,7 +69,7 @@ int ml_dsa_87_open_message(uint8_t *m, size_t *mlen,
                           const uint8_t *sm, size_t smlen,
                           const uint8_t *pk);
 /* ===================================================  */
-
+#define NTESTS 5
 /* ===================================================  */
 /* Key sizes and other constants */
 // ML-KEM-512

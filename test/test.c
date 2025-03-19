@@ -1,17 +1,15 @@
 #include "../ml_crypto.h"
+#include "../common/randombytes.h"
  // randombytes 함수를 위한 헤더 추가
 
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include <time.h>
 
 
-#define NTESTS 5
 
-#define MAXLEN 2048
 // randombytes 함수 프로토타입 선언 추가
-void randombytes(uint8_t *mi, int i);
+// void randombytes(uint8_t *mi, int i);
 
 static void printbytes(const uint8_t *x, size_t xlen) {
     size_t i;
@@ -22,19 +20,19 @@ static void printbytes(const uint8_t *x, size_t xlen) {
 }
 
 // 함수 구현부
-void randombytes(uint8_t *mi, int i) {
-    // 첫 호출 시 난수 생성기 초기화
-    static int initialized = 0;
-    if (!initialized) {
-        srand((unsigned int)time(NULL));
-        initialized = 1;
-    }
+// void randombytes(uint8_t *mi, int i) {
+//     // 첫 호출 시 난수 생성기 초기화
+//     static int initialized = 0;
+//     if (!initialized) {
+//         srand((unsigned int)time(NULL));
+//         initialized = 1;
+//     }
     
-    // i 길이만큼 랜덤 바이트 생성
-    for (int j = 0; j < i; j++) {
-        mi[j] = (uint8_t)(rand() % 256);
-    }
-}
+//     // i 길이만큼 랜덤 바이트 생성
+//     for (int j = 0; j < i; j++) {
+//         mi[j] = (uint8_t)(rand() % 256);
+//     }
+// }
 
 
 int main() {
@@ -42,7 +40,7 @@ int main() {
     //  그냥 지금 정의해서 웹에서도 그 번호를 보내는 형태로 구현하자
     int select = 0;
     printf(" (1) ml-kem-512, (2) ml-kem-768, (3) ml-kem-1024\n");
-    printf(" (4) ml-dsa-44,  (2) ml-dsa-65,  (3) ml-dsa-87 \n");
+    printf(" (4) ml-dsa-44,  (5) ml-dsa-65,  (6) ml-dsa-87 \n");
     // 옵션 떄문에 리턴처리 안해주면 오류 정상 반환 값이 1
     if (scanf("%d", &select) != 1) {
         printf("입력 오류 \n");
@@ -171,6 +169,8 @@ int main() {
         /* i = 0, 1, 4, 16, 64, 256, 1024 */
         for (i = 0; i < MAXLEN; i = (i == 0) ? i + 1 : i << 2) {
             randombytes(mi, i);
+            printf(" ORIGINAL MESSAGE : ");
+            printbytes(mi, i);
 
             ml_dsa_44_keypair_gen(pk, sk);
 
@@ -202,6 +202,123 @@ int main() {
             }
         }
        
+    }
+
+    else if (select == 5) {
+        uint8_t sk[ML_DSA_65_SECRET_KEY_BYTES];
+        uint8_t pk[ML_DSA_65_PUBLIC_KEY_BYTES];
+
+        uint8_t mi[MAXLEN];
+        uint8_t sm[MAXLEN + ML_DSA_65_SIGNATURE_BYTES];
+        uint8_t sig[ML_DSA_65_SIGNATURE_BYTES];
+
+        size_t smlen;
+        size_t siglen;
+        size_t mlen;
+
+        int r;
+        size_t i, k;
+
+        /* i = 0, 1, 4, 16, 64, 256, 1024 */
+        for (i = 0; i < MAXLEN; i = (i==0) ? i + 1 : i << 2) {
+            randombytes(mi, i);
+            printf(" ORIGINAL MESSAGE : ");
+            printbytes(mi, i);
+
+            ml_dsa_65_keypair_gen(pk, sk);
+            printf(" Pulbic Key : ");
+            printbytes(pk, ML_DSA_65_PUBLIC_KEY_BYTES);
+            printf(" Secret Key : ");
+            printbytes(sk, ML_DSA_65_SECRET_KEY_BYTES);
+
+            ml_dsa_65_sign_message(sm, &smlen, mi, i, sk);
+            ml_dsa_65_sign(sig, &siglen, mi, i, sk);
+
+            printf(" Signature + Message : ");
+            printbytes(sm, smlen);
+            printf(" Signature : ");
+            printbytes(sig, siglen);
+            
+            // 정상 처리 되면 return 값 0반환해서, r이라는 변수 주고 r로 정상 작동 체크
+            // 0 이상의 값이 오면 에러임.
+
+            // sm은 현재 [서명 || 원본메시지] 로 되어 있는데 함수 돌게 되면
+            // 입력 : sm [서명 || 메시지 ] -> 검증 -> sm [메시지] (메시지만 남게 됨)
+            r = ml_dsa_65_open_message(sm, &mlen, sm, smlen, pk);
+            r |= ml_dsa_65_verify(sig, siglen, mi, i, pk);
+
+            if (r) {
+                printf(" ERROR : Signature Verification Failed \n");
+                return -1;
+            }
+            
+            for (k = 0; k < i; k++) {
+                if (sm[k] != mi[k]) {
+                    printf("ERROR : Message Recovery Failed\n");
+                    return -1;
+                }
+            }
+            printf("Message Recocvery Success \n");
+            printf(" SM (과정 수행후 메시지만 남음) : ");
+            printbytes(sm, smlen);
+
+            printf(" M (원래 메시지) : ") ;
+            printbytes(mi, mlen);
+
+        }
+    }
+
+    else if (select == 6) {
+        uint8_t sk[ML_DSA_87_SECRET_KEY_BYTES];
+        uint8_t pk[ML_DSA_87_PUBLIC_KEY_BYTES];
+
+        uint8_t mi[MAXLEN];
+        uint8_t sm[MAXLEN + ML_DSA_87_SIGNATURE_BYTES];
+        uint8_t sig[ML_DSA_87_SIGNATURE_BYTES];
+
+        size_t smlen;
+        size_t siglen;
+        size_t mlen;
+
+        int r;
+        size_t i, k;
+
+        /* i = 0, 1, 4, 16, 64, 256, 1024 */
+        for (i = 0; i < MAXLEN; i = (i==0) ? i + 1 : i << 2) {
+            randombytes(mi, i);
+            printf("Original Message : ");
+            printbytes(mi, i);
+
+            ml_dsa_87_keypair_gen(pk, sk);
+
+            printf(" Public Key : ");
+            printbytes(pk, ML_DSA_87_PUBLIC_KEY_BYTES);
+            printf(" Secret Key : ");
+            printbytes(sk, ML_DSA_87_SECRET_KEY_BYTES);
+
+            ml_dsa_87_sign_message(sm, &smlen, mi, i, sk);
+            ml_dsa_87_sign(sig, &siglen, mi, i, sk);
+
+            printf("Sig + Message : ");
+            printbytes(sm, smlen);
+            printf("Sig");
+            printbytes(sig, siglen);
+
+            r = ml_dsa_87_open_message(sm, &mlen, sm, smlen, pk);
+            r |= ml_dsa_87_verify(sig, siglen, mi, i, pk);
+
+            if (r) {
+                printf("ERROR : signature verification failed\n");
+                return -1;
+            }
+            for (k = 0; k < i; k++) {
+                if (sm[k] != mi[k]) {
+                    printf("ERROR : message recovery failed\n");
+                    return -1;
+                }
+            }
+            printf("SUCCESS\n");
+        }
     }
 
     return 0;
