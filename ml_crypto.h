@@ -144,8 +144,26 @@ int sphincs_sha2_192f_open_message(uint8_t *m, size_t *mlen,
                                     const uint8_t *pk);
 
 /* SPHINCS+-SHA2-192s-simple */
+int sphincs_sha2_192s_seed_keypair(uint8_t *pk, uint8_t *sk, uint8_t *seed);
 
+int sphincs_sha2_192s_keypair(uint8_t *pk, uint8_t *sk);
 
+int sphincs_sha2_192s_sign_message(uint8_t *sm, size_t *smlen,
+                                    const uint8_t *m, size_t mlen, 
+                                    const uint8_t *sk);
+
+int sphincs_sha2_192s_signature(uint8_t *sig, size_t signlen,
+                            const uint8_t *m, size_t mlen,
+                            const uint8_t *sk);
+// 시그니처만 검증하는 함수
+int sphincs_sha2_192s_verify(const uint8_t *sig, size_t siglen,
+                                const uint8_t *m, size_t mlen,
+                                const uint8_t *pk);
+
+// 시그니처 || 메시지 검증 하는 함수, 최종저으로 메시지만 남게된다. x
+int sphincs_sha2_192s_open_message(uint8_t *m, size_t *mlen,
+                                        const uint8_t *sm, size_t smlen,
+                                        const uint8_t *pk);
     
 
 
