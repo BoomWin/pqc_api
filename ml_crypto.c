@@ -281,6 +281,10 @@ int sphincs_sha2_192s_verify(const uint8_t *sig, size_t siglen,
     return PQCLEAN_SPHINCSSHA2192SSIMPLE_CLEAN_crypto_sign_verify(sig, siglen, m, mlen, pk);
 }
 
-int sphincs_sha2_192s_
+int sphincs_sha2_192s_open_message(uint8_t *m, size_t *mlen,
+                                  const uint8_t *sm, size_t smlen,
+                                  const uint8_t *pk) {
+    return PQCLEAN_SPHINCSSHA2192SSIMPLE_CLEAN_crypto_sign_open(m, mlen, sm, smlen, pk);
+}
 
 /* ======================================================================== */
