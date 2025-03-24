@@ -272,7 +272,15 @@ int sphincs_sha2_192s_sign_message(uint8_t *sm, size_t *smlen,
 int sphincs_sha2_192s_signature(uint8_t *sig, size_t *siglen,
                                 const uint8_t *m, size_t mlen,
                                 const uint8_t *sk) {
-    return PQCLEAN_sphincssha2192ssimple_clean_crypto_sign_signature(sig, siglen, m, mlen, sk);
+    return PQCLEAN_SPHINCSSHA2192SSIMPLE_CLEAN_crypto_sign_signature(sig, siglen, m, mlen, sk);
 }
+
+int sphincs_sha2_192s_verify(const uint8_t *sig, size_t siglen,
+                            const uint8_t *m, size_t mlen,
+                            const uint8_t *pk) {
+    return PQCLEAN_SPHINCSSHA2192SSIMPLE_CLEAN_crypto_sign_verify(sig, siglen, m, mlen, pk);
+}
+
+int sphincs_sha2_192s_
 
 /* ======================================================================== */
