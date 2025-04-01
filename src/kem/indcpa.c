@@ -100,4 +100,91 @@ void gen_matrix(polyvec *a, const uint8_t *seed, int transposed, PQC_MODE mode) 
     unsigned int ctr, i, j, k;
     unsigned int buflen;
     uint8_t buf[GEN_MATRIX_NBLOCKS * XOF_BLOCKBYTES];
+    xof_state state;
+
+    switch (mode) {
+    case PQC_MODE_1:
+        k = MLKEM_512_K;
+        break;
+    case PQC_MODE_2:
+        k = MLKEM_768_K;
+        break;
+    case PQC_MODE_3:
+        k = MLKEM_1024_K;
+        break;
+    default:
+        return;
+    }
+
+    for (i = 0; i < k; i++) {
+        for (j = 0; j < k; j++) {
+            if (transposed) {
+                xof_absorb(&state, seed, (uint8_t)i, (uint8_t)j);
+            }
+            else {
+                xof_absorb(&state, seed, (uint8_t)j, (uint8_t)i);
+            }
+
+            xof_squeezeblocks(buf, GEN_MATRIX_NBLOCKS, &state);
+            buflen = GEN_MATRIX_NBLOCKS * XOF_BLOCKBYTES;
+            ctr = rej_uniform(a[i].vec[j].coeffs, MLKEM_N, buf, buflen);
+
+            while (ctr < MLKEM_N) {
+                xof_squeezeblocks(buf, 1, &state);
+                buflen = XOF_BLOCKBYTES;
+                ctr += rej_uniform(a[i].vec[j].coeffs + ctr, MLKEM_N - ctr, buf, buflen);
+            }
+            xof_ctx_release(&state);
+        }
+    }
 }
+
+void indcpa_keypair_derand(uint8_t *pk, uint8_t *sk, const uint8_t *coins, PQC_MODE mode) {
+    unsigned int i;
+    uint8_t buf[2 * MLKEM_SYMBYTES];
+    const uint8_t *publicseed = buf;
+    const uint8_t *noiseseed = buf + MLKEM_SYMBYTES;
+    uint8_t nonce = 0;
+    // 최대 k가 4인 것을 고려함.
+    polyvec a[4];
+    polyvec e, pkpv, skpv;
+    int k;
+
+    get_kem_params(mode, &k, NULL, NULL);
+
+    // Initialize seeds
+    memcpy(buf, coins, MLKEM_SYMBYTES);
+    buf[MLKEM_SYMBYTES] = k;
+    hash_g(buf, buf, MLKEM_SYMBYTES + 1);
+
+    // Generate Matrix A
+    gen_matrix(a, publicseed, 0, mode);
+
+    // Generate secret and error polynomials
+    for (i = 0; i < k; i++) {
+        poly_getnoise_eta1(&skpv.vec[i], noiseseed, nonce++, mode);
+    }
+
+    for (i = 0; i < k; i++) {
+        poly_getnoise_eta1(&e.vec[i], noiseseed, nonce++, mode);
+    }
+
+    // NTT transformation
+    polyvec_ntt(&skpv, mode);
+    polyvec_ntt(&e, mode);
+
+    // Matrix multiplication
+    for (i = 0; i < k; i++) {
+        polyvec_basemul_acc_montgomery(&pkpv.vec[i], &a[i], &skpv, mode);
+        poly_tomont(&pkpv.vec[i], mode);
+    }
+
+    polyvec_add(&pkpv, &pkpv, &e, mode);
+    polyvec_reduce(&pkpv, mode);
+
+    // Pack keys
+    pack_sk(sk, &skpv, mode);
+    pack_pk(pk, &pkpv, publicseed, mode);
+        
+}
+
