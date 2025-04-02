@@ -39,6 +39,30 @@ static size_t get_polyveccompressbytes(PQC_MODE mode) {
     }
 }
 
+// helper 함수
+static int get_kem_params(PQC_MODE mode, int *k_params, int *eta1, int *eta2) {
+    switch (mode) {
+        case PQC_MODE_1: // ML-KEM-512
+            if (k_params) *k_params = MLKEM_512_K;
+            if (eta1) *eta1 = MLKEM_512_ETA1;
+            if (eta2) *eta2 = MLKEM_512_ETA2;
+            break;
+        case PQC_MODE_2: // ML-KEM-768
+            if (k_params) *k_params = MLKEM_768_K;
+            if (eta1) *eta1 = MLKEM_768_ETA1;
+            if (eta2) *eta2 = MLKEM_768_ETA2;
+            break;
+        case PQC_MODE_3: // ML-KEM-1024
+            if (k_params) *k_params = MLKEM_1024_K;
+            if (eta1) *eta1 = MLKEM_1024_ETA1;
+            if (eta2) *eta2 = MLKEM_1024_ETA2;
+            break;
+        default:
+            return -1; // 적절한 에러 리턴
+    }
+    return 0; // 성공시 0 리턴
+}
+
 
 static void pack_pk(uint8_t *r, polyvec *pk, const uint8_t *seed, PQC_MODE mode) {
     polyvec_tobytes(r, pk, mode);
@@ -96,6 +120,9 @@ static unsigned int rej_uniform(int16_t *r,
 
 #define GEN_MATRIX_NBLOCKS ((12*MLKEM_N/8*(1 << 12)/MLKEM_Q + XOF_BLOCKBYTES)/XOF_BLOCKBYTES)
 
+
+// transposed=0일 때 원래 A 행렬 생성 (gen_a에 해당)
+// transposed=1일 때 A의 전치 행렬 생성 (gen_at에 해당)
 void gen_matrix(polyvec *a, const uint8_t *seed, int transposed, PQC_MODE mode) {
     unsigned int ctr, i, j, k;
     unsigned int buflen;
@@ -148,20 +175,20 @@ void indcpa_keypair_derand(uint8_t *pk, uint8_t *sk, const uint8_t *coins, PQC_M
     // 최대 k가 4인 것을 고려함.
     polyvec a[4];
     polyvec e, pkpv, skpv;
-    int k;
+    int params_k;
 
-    get_kem_params(mode, &k, NULL, NULL);
+    get_kem_params(mode, &params_k, NULL, NULL);
 
     // Initialize seeds
     memcpy(buf, coins, MLKEM_SYMBYTES);
-    buf[MLKEM_SYMBYTES] = k;
+    buf[MLKEM_SYMBYTES] = params_k;
     hash_g(buf, buf, MLKEM_SYMBYTES + 1);
 
     // Generate Matrix A
     gen_matrix(a, publicseed, 0, mode);
 
     // Generate secret and error polynomials
-    for (i = 0; i < k; i++) {
+    for (i = 0; i < params_k; i++) {
         poly_getnoise_eta1(&skpv.vec[i], noiseseed, nonce++, mode);
     }
 
@@ -188,3 +215,15 @@ void indcpa_keypair_derand(uint8_t *pk, uint8_t *sk, const uint8_t *coins, PQC_M
         
 }
 
+void indcpa_enc(uint8_t *c, const uint8_t *m, const uint8_t *pk, const uint8_t *coins, PQC_MODE mode) {
+    unsigned int i;
+    uint8_t seed[MLKEM_SYMBYTES];
+    uint8_t nonce = 0;
+    polyvec sp, pkpv, ep, at[4], b; // 최대 k=4 고려
+    poly v, k, epp;
+    int params_k;
+
+    get_kem_params(mode, &k, NULL, NULL);
+
+
+}
