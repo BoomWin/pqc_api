@@ -4,6 +4,8 @@
         "randombytes.h": "c",
         "symmetric.h": "c",
         "ml_crypto.h": "c",
-        "cbd.h": "c"
+        "cbd.h": "c",
+        "kem.h": "c",
+        "stdint.h": "c"
     }
 }
