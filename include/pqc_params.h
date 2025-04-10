@@ -103,7 +103,8 @@ typedef enum {
 #define ML_KEM_1024_CIPHERTEXT_BYTES  1568
 
 /* Common derived parameters*/
-
+// Maximum ciphertext size among all ML-KEM modes
+#define MLKEM_MAX_CIPHERTEXTBYTES ML_KEM_1024_CIPHERTEXT_BYTES
 
 
 /*************************************/

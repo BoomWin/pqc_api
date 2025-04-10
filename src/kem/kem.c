@@ -5,6 +5,7 @@
 #include "verify.h"
 #include <stddef.h>
 #include <string.h>
+#include <stdio.h> // 오류 로깅을 위함
 
 
 int crypto_kem_keypair_derand(uint8_t *pk, uint8_t *sk, const uint8_t *coins, PQC_MODE mode) {
@@ -12,34 +13,123 @@ int crypto_kem_keypair_derand(uint8_t *pk, uint8_t *sk, const uint8_t *coins, PQ
 
     indcpa_secretkeybytes = get_mlkem_secretkeybytes(mode);
     publickeybytes = get_mlkem_publickeybytes(mode);
-    secretkeybytes = get_mlkem_secretkeybytes(mode);
+    secretkeybytes = get_mlkem_secretkeybytes(mode); // 전체 비밀키 크기
 
-    if (indcpa_secretkeybytes && publickeybytes && secretkeybytes == 0) {
-        pritnf("파라미터 불러오기 error!!!!!");
+    // 파라미터 검색 성공 여부 확인
+    if (indcpa_secretkeybytes == 0 || publickeybytes == 0 || secretkeybytes == 0) {
+        fprintf(stderr, "오류: 모드 %d에 대한 키 크기를 가져오지 못했습니다.\n", mode);
+        return -1; // 오류 표시
     }
 
-    // Generate keypair
+
+    // IND-CPA 키 쌍 생성
     indcpa_keypair_derand(pk, sk, coins, mode);
 
-    // Append public key to secret key
+    // 비밀키에 공개키 추가 (sk = indcpa_sk || pk)
     memcpy(sk + indcpa_secretkeybytes, pk, publickeybytes);
 
-    // Append hash of public key to secret key
+    // 비밀키에 공개키 해시 추가 (sk = indcpa_sk || pk || H(pk))
+    // hash_h 출력 크기가 MLKEM_SYMBYTES라고 가정
     hash_h(sk + secretkeybytes - 2 * MLKEM_SYMBYTES, pk, publickeybytes);
 
-    // Value z for pseudo-random output on reject
+    // Fujisaki-Okamoto 변환을 위한 z 값 추가 (sk = indcpa_sk || pk || H(pk) || z)
+    // coins = (d || z), d는 키 생성용, z는 FO 변환용
+    // coins 크기가 2 * MLKEM_SYMBYTES라고 가정
     memcpy(sk + secretkeybytes - MLKEM_SYMBYTES, coins + MLKEM_SYMBYTES, MLKEM_SYMBYTES);
-    return 0;
+    return 0; // 성공
 }
 
 int crypto_kem_keypair(uint8_t *pk, uint8_t *sk, PQC_MODE mode) {
     uint8_t coins[2 * MLKEM_SYMBYTES];
     randombytes(coins, 2 * MLKEM_SYMBYTES);
-    crypto_kem_keypair_derand(pk, sk, coins, mode);
+    // 결정적 버전 호출 및 상태 반환
+    // crypto_kem_keypair_derand 함수 호출 시 정상적으로 동작하지 않으면 return 0을 보내니깐.
+    return crypto_kem_keypair_derand(pk, sk, coins, mode);
+}
+
+// KEM 캡슐화 (FIPS 203 Alg 11 기반 결정적 버전)
+// 입력: 공개키 `pk`, 무작위성 `coins` (명세서의 델타, 크기 MLKEM_SYMBYTES)
+// 출력: 암호문 `ct`, 공유 비밀 `ss`
+int crypto_kem_enc_derand(uint8_t *ct, uint8_t *ss,
+                            const uint8_t *pk, const uint8_t *coins, PQC_MODE mode) {
+    size_t publickeybytes = get_mlkem_publickeybytes(mode);
+    // 파라미터 검증
+    if (publickeybytes == 0) {
+        fprintf(stderr, "오류: 모드 %d에 대한 공개키 크기를 가져오지 못했습니다.\n", mode);
+        return -1;
+    }
+
+    uint8_t buf[2 * MLKEM_SYMBYTES];
+    /* Will contain key, coins */
+    uint8_t kr[2 * MLKEM_SYMBYTES];
+
+    memcpy(buf, coins, MLKEM_SYMBYTES);
+
+    
+
+    /* Multitarget countermeasure for coins + contributory KEM */
+    hash_h(buf + MLKEM_SYMBYTES, pk, publickeybytes);
+    hash_g(kr, buf, 2 * MLKEM_SYMBYTES);
+
+    /* coins are in kr+KYBER_SYMBYTES*/
+    indcpa_enc(ct, buf, pk, kr + MLKEM_SYMBYTES, mode);
+
+    memcpy(ss, kr, MLKEM_SYMBYTES);
+
     return 0;
 }
 
-int crypto_kem_enc_derand(uint8_t *ct, uint8_t *ss, 
-                            const uint8_t *pk, const uint8_t *coins) {
-    
+// KEM 캡슐화 (FIPS 203 Alg 9 기반 표준 버전)
+// 내부적으로 무작위성을 생성하고 결정적 버전을 호출합니다.
+// 입력: 공개키 `pk`
+// 출력: 암호문 `ct`, 공유 비밀 `ss`
+int crypto_kem_enc(uint8_t *ct, uint8_t *ss, const uint8_t *pk, PQC_MODE mode) {
+    uint8_t coins[MLKEM_SYMBYTES]; // FIPS 203 Alg 11 표기법의 'delta'
+    // 메시지/델타에 대한 랜덤 바이트 생성
+    randombytes(coins, MLKEM_SYMBYTES);
+    // 결정적 캡슐화 함수 호출
+    // reutrn 0이 성공을 나타내는데, crypt_kem_enc_derand에서 retrun0을 뱉기때문에 0으로 처리
+    return crypto_kem_enc_derand(ct, ss, pk, coins, mode);
+}
+
+// KEM 복호화
+// 입력: 암호문 `ct`, 비밀키 `sk`
+// 출력: 공유 비밀 `ss`
+int crypto_kem_dec(uint8_t *ss, const uint8_t *ct, const uint8_t *sk, PQC_MODE mode) {
+    // 파라미터 가져오기
+    size_t ciphertextbytes = get_mlkem_ciphertextbytes(mode);
+    size_t indcpa_secretkeybytes = get_mlkem_indcpa_secretkeybytes(mode);
+    size_t secretkeybytes = get_mlkem_secretkeybytes(mode);
+
+    // 파라미터 검증
+    if (ciphertextbytes == 0 || indcpa_secretkeybytes == 0 || secretkeybytes == 0) {
+        fprintf(stderr, "오류: 모드 %d에 대한 암호문 크기를 가져오지 못했습니다.\n", mode);
+        return -1;
+    }
+
+    int fail;
+    uint8_t buf[2 * MLKEM_SYMBYTES];
+    /* Will contain key, coins */
+    uint8_t kr[2 * MLKEM_SYMBYTES];
+    uint8_t cmp[ciphertextbytes + MLKEM_SYMBYTES];
+    const uint8_t *pk = sk + indcpa_secretkeybytes;
+
+    indcpa_dec(buf, ct, sk, mode);
+
+    /* Multitarget countermeasure for coins + contributory KEM */
+    memcpy(buf + MLKEM_SYMBYTES, sk + secretkeybytes - 2 * MLKEM_SYMBYTES, MLKEM_SYMBYTES);
+    hash_g(kr, buf, 2 * MLKEM_SYMBYTES);
+
+    /* coins are in kr+MLKEM_SYMBYTES*/
+    indcpa_enc(cmp, buf, pk, kr + MLKEM_SYMBYTES, mode);
+
+    fail = crypto_verify(ct, cmp, ciphertextbytes, mode);
+
+    /* Compute rejection key */
+    rkprf(ss, sk + secretkeybytes - MLKEM_SYMBYTES, ct, mode);
+
+    /* Copy true key to return buffer if fail is false */
+    mlkem_cmov(ss, kr, MLKEM_SYMBYTES, (uint8_t) (1 - fail));
+
+    return 0;
 }
