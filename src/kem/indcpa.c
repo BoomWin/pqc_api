@@ -82,13 +82,13 @@ void gen_matrix(polyvec *a, const uint8_t *seed, int transposed, PQC_MODE mode) 
         printf("k_params 불러오기 error 입니다.");
     }
 
-    for (i = 0; i < k; i++) {
-        for (j = 0; j < k; j++) {
+    for (i = 0; i < params_k; i++) {
+        for (j = 0; j < params_k; j++) {
             if (transposed) {
-                xof_absorb(&state, seed, (uint8_t)i, (uint8_t)j);
+                xof_absorb(&state, seed, (uint8_t)i, (uint8_t)j, mode);
             }
             else {
-                xof_absorb(&state, seed, (uint8_t)j, (uint8_t)i);
+                xof_absorb(&state, seed, (uint8_t)j, (uint8_t)i, mode);
             }
 
             xof_squeezeblocks(buf, GEN_MATRIX_NBLOCKS, &state);
@@ -169,7 +169,7 @@ void indcpa_enc(uint8_t *c, const uint8_t *m, const uint8_t *pk, const uint8_t *
     params_k = get_mlkem_k(mode);
 
     if (params_k == 0) {
-        printf("파라미터 K 불러오기 Error !!!!")
+        printf("파라미터 K 불러오기 Error !!!!");
     }
 
     // Unpack public key
