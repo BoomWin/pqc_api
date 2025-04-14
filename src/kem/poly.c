@@ -189,7 +189,7 @@ void mlkem_poly_frommsg(poly *r, const uint8_t * msg, PQC_MODE mode) {
     for (i = 0; i < MLKEM_N / 8; i++) {
         for (j = 0; j < 8; j++) {
             r->coeffs[8 * i + j] = 0;
-            cmov_int16(r->coeffs + 8 * i + j, ((MLKEM_Q + 1) / 2), (msg[i] >> j) & 1);
+            mlkem_cmov_int16(r->coeffs + 8 * i + j, ((MLKEM_Q + 1) / 2), (msg[i] >> j) & 1);
         }
     }
 }
@@ -244,7 +244,7 @@ void mlkem_poly_getnoise_eta1(poly *r, const uint8_t *seed, uint8_t nonce, PQC_M
     // eta1이 다르면 buf 크기도 다름
     uint8_t buf[eta1 * MLKEM_N / 4];
     // 시드와 논스를 사용하여 랜덤바이트 생성
-    prf(buf, sizeof(buf), seed, nonce);
+    prf(buf, sizeof(buf), seed, nonce, mode);
 
     // 중심화 이항 분포 노이즈 생성
     poly_cbd_eta1(r, buf, mode);
@@ -266,7 +266,7 @@ void mlkem_poly_getnoise_eta1(poly *r, const uint8_t *seed, uint8_t nonce, PQC_M
 void mlkem_poly_getnoise_eta2(poly *r, const uint8_t *seed, uint8_t nonce, PQC_MODE mode) {
     unsigned int eta2 = get_mlkem_eta2(mode);   // 모든 모드에서 2
     uint8_t buf[eta2 * MLKEM_N / 4];
-    prf(buf, sizeof(buf), seed, nonce);
+    prf(buf, sizeof(buf), seed, nonce, mode);
     poly_cbd_eta2(r, buf, mode);
 
 }
@@ -335,7 +335,7 @@ void mlkem_poly_tomont(poly *r, PQC_MODE mode) {
     (void)mode; // 모드 독립적 함수
 
     for (i = 0; i < MLKEM_N; i++) {
-        r->coeffs[i] = montgomery_reduce((int32_t)r->coeffs[i] * f);
+        r->coeffs[i] = mlkem_montgomery_reduce((int32_t)r->coeffs[i] * f);
     }
 }
 
@@ -355,7 +355,7 @@ void mlkem_poly_reduce(poly *r, PQC_MODE mode) {
     (void)mode; // 모드 독립적 함수
 
     for (i = 0; i < MLKEM_N; i++) {
-        r->coeffs[i] = barrett_reduce(r->coeffs[i]);
+        r->coeffs[i] = mlkem_barrett_reduce(r->coeffs[i]);
     }
 }
 

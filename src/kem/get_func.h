@@ -1,5 +1,5 @@
 #include "../../include/pqc_params.h"
-#include "./ml-kem-512/clean/polyvec.h"
+#include "polyvec.h"
 
 // 모드에 따른 K 값 반환
 static inline int get_mlkem_k(PQC_MODE mode);

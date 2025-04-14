@@ -1,5 +1,5 @@
 #include "symmetric.h"
-#include "./include/pqc_params.h"
+#include "../include/pqc_params.h"
 
 /*************************************************
 * Name:        mlkem_shake128_absorb

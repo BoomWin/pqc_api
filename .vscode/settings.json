@@ -8,6 +8,11 @@
         "kem.h": "c",
         "stdint.h": "c",
         "ntt.h": "c",
-        "polyvec.h": "c"
+        "polyvec.h": "c",
+        "pqc_params.h": "c",
+        "stddef.h": "c",
+        "fips202.h": "c",
+        "poly.h": "c",
+        "get_func.h": "c"
     }
 }

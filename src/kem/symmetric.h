@@ -1,8 +1,8 @@
 #ifndef SYMMETRIC_H
 #define SYMMETRIC_H
 
-#include "fips202.h"
-#include "./include/pqc_params.h"
+#include "../common/fips202.h"
+#include "../include/pqc_params.h"
 #include <stddef.h>
 #include <stdint.h>
 

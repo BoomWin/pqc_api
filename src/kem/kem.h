@@ -1,4 +1,5 @@
-#include "./include/pqc_params.h"
+#include "../include/pqc_params.h"
+#include "../common/fips202.h"
 #include "get_func.h"
 #include <stdint.h>
 
