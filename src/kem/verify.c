@@ -47,3 +47,21 @@ void mlkem_cmov(uint8_t *r, const uint8_t *x, size_t len, uint8_t b) {
         r[i] ^= b & (r[i] ^ x[i]);
     }
 }
+
+
+/*************************************************
+* Name:        mlkem_cmov_int16
+*
+* Description: b가 1이면 v를 *r에 복사하고,
+*              b가 0이면 *r을 수정하지 않음.
+*              b는 {0,1} 중 하나여야 함.
+*              상수 시간에 실행됨.
+*
+* Arguments:   int16_t *r:       출력 int16_t 포인터
+*              int16_t v:        입력 int16_t 값
+*              uint16_t b:       조건 비트; {0,1} 중 하나여야 함
+**************************************************/
+void mlkem_cmov_int16(int16_t *r, int16_t v, uint16_t b) {
+    b = -b;
+    *r ^= b & ((*r) ^ v);
+}
