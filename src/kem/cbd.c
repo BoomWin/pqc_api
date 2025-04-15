@@ -54,7 +54,7 @@ static void cbd3(poly *r, const uint8_t *buf) {
     }
 }
 
-void poly_cbd_eta1(poly *r, const uint8_t *buf, PQC_MODE mode) {
+void poly_cbd_eta1(poly *r, const uint8_t *buf, int mode) {
     switch (mode) {
         case PQC_MODE_1:    // ML-KEM-512
             cbd3(r, buf);
@@ -70,6 +70,6 @@ void poly_cbd_eta1(poly *r, const uint8_t *buf, PQC_MODE mode) {
     return 0;
 }
 
-void poly_cbd_eta2(poly *r, const uint8_t *buf, PQC_MODE mode) {
+void poly_cbd_eta2(poly *r, const uint8_t *buf, int mode) {
     cbd2(r, buf); // 모든 보안레벨에서 eta2=2 사용
 }

@@ -1,5 +1,7 @@
 #include "symmetric.h"
 #include "../include/pqc_params.h"
+#include "get_func.h"
+#include <string.h>
 
 /*************************************************
 * Name:        mlkem_shake128_absorb
@@ -10,14 +12,14 @@
 *              - const uint8_t *seed: 상태에 흡수될 KYBER_SYMBYTES 크기의 입력에 대한 포인터
 *              - uint8_t x: 추가 입력 바이트
 *              - uint8_t y: 추가 입력 바이트
-*              - PQC_MODE mode: 동작 모드 (PQC_MODE_1/2/3 - ML-KEM-512/768/1024)
+*              - int mode: 동작 모드 (int_1/2/3 - ML-KEM-512/768/1024)
 **************************************************/
 
 void mlkem_shake128_absorb(xof_state *state,
                             const uint8_t seed[MLKEM_SYMBYTES],
                             uint8_t x,
                             uint8_t y,
-                            PQC_MODE mode) {
+                            int mode) {
     uint8_t extseed[MLKEM_SYMBYTES + 2];
 
     memcpy(extseed, seed, MLKEM_SYMBYTES);
@@ -37,14 +39,14 @@ void mlkem_shake128_absorb(xof_state *state,
 *              - size_t outlen: 요청된 출력 바이트 수
 *              - const uint8_t *key: 키에 대한 포인터 (MLKEM_SYMBYTES 길이)
 *              - uint8_t nonce: 단일 바이트 nonce (공개 PRF 입력)
-*              - PQC_MODE mode: 동작 모드 (PQC_MODE_1/2/3 - ML-KEM-512/768/1024)
+*              - int mode: 동작 모드 (int_1/2/3 - ML-KEM-512/768/1024)
 **************************************************/
 
 void mlkem_shake256_prf(uint8_t *out,
                         size_t outlen,
                         const uint8_t key[MLKEM_SYMBYTES],
                         uint8_t nonce,
-                        PQC_MODE mode) {
+                        int mode) {
     uint8_t extkey[MLKEM_SYMBYTES + 1];
 
     memcpy(extkey, key, MLKEM_SYMBYTES);
@@ -63,12 +65,12 @@ void mlkem_shake256_prf(uint8_t *out,
 * Arguments:   - uint8_t *out: 출력에 대한 포인터 (MLKEM_SSBYTES 크기)
 *              - const uint8_t *key: 키에 대한 포인터 (MLKEM_SYMBYTES 길이)
 *              - const uint8_t *input: 입력에 대한 포인터 (MLKEM_CIPHERTEXTBYTES 크기)
-*              - PQC_MODE mode: 동작 모드 (PQC_MODE_1/2/3 - ML-KEM-512/768/1024)
+*              - int mode: 동작 모드 (int_1/2/3 - ML-KEM-512/768/1024)
 **************************************************/
 void mlkem_shake256_rkprf(uint8_t *out,
                           const uint8_t key[MLKEM_SYMBYTES],
                           const uint8_t *input,
-                          PQC_MODE mode) {
+                          int mode) {
     shake256incctx s;
     size_t ciphertext_bytes = get_mlkem_ciphertextbytes(mode);
 

@@ -30,17 +30,17 @@ const int16_t zetas[128] = {
 *
 * Arguments:   - int16_t a: 첫 번째 인수
 *              - int16_t b: 두 번째 인수
-*              - PQC_MODE mode: 동작 모드 (여기서는 사용하지 않음)
+*              - int mode: 동작 모드 (여기서는 사용하지 않음)
 *
 * Returns 16-bit integer congruent to a*b*R^{-1} mod q
 **************************************************/
 
-static int16_t fqmul(int16_t a, int16_t b, PQC_MODE mode) {
+static int16_t fqmul(int16_t a, int16_t b, int mode) {
     // 모드 매개변수는 인터페이스 일관성을 위해 추가했지만,
     // ML-KEM의 경우 내부적으로는 모든 모드가 동일한 Montgomery 상수를 사용하므로 무시해도 됨
     // reduce.h에 있는 함수 이름을 사용 (예 : montgomery_reduce)
     (void)mode; // 경고 방지
-    return montgomery_reduce((int32_t)a * b);
+    return mlkem_montgomery_reduce((int32_t)a * b);
 }
 
 /*************************************************
@@ -50,10 +50,10 @@ static int16_t fqmul(int16_t a, int16_t b, PQC_MODE mode) {
 *              입력은 표준 순서, 출력은 비트 역순 순서.
 *
 * Arguments:   - int16_t r[MLKEM_N]: 입력/출력 다항식 계수 배열 (in-place 변환)
-*              - PQC_MODE mode: 동작 모드 (PQC_MODE_1/2/3 - ML-KEM-512/768/1024)
+*              - int mode: 동작 모드 (int_1/2/3 - ML-KEM-512/768/1024)
 **************************************************/
 
-void mlkem_ntt(int16_t r[MLKEM_N], PQC_MODE mode) {
+void mlkem_ntt(int16_t r[MLKEM_N], int mode) {
     unsigned int len, start, j, k;
     int16_t t, zeta_val;
 
@@ -82,10 +82,10 @@ void mlkem_ntt(int16_t r[MLKEM_N], PQC_MODE mode) {
 *              입력은 비트 역순 순서, 출력은 표준 순서.
 *
 * Arguments:   - int16_t r[MLKEM_N]: 입력/출력 다항식 계수 배열 (in-place 변환)
-*              - PQC_MODE mode: 동작 모드 (PQC_MODE_1/2/3 - ML-KEM-512/768/1024)
+*              - int mode: 동작 모드 (int_1/2/3 - ML-KEM-512/768/1024)
 **************************************************/
 
-void mlkem_invntt(int16_t r[MLKEM_N], PQC_MODE mode) {
+void mlkem_invntt(int16_t r[MLKEM_N], int mode) {
     unsigned int start, len, j, k;
     int16_t t, zeta_val;
     const int16_t f = 1441; // mont^2/128
@@ -100,7 +100,7 @@ void mlkem_invntt(int16_t r[MLKEM_N], PQC_MODE mode) {
             zeta_val = zetas[k--];
             for (j = start; j < start + len; j++) {
                 t = r[j];
-                r[j] = barrett_reduce(t + r[j + len]);
+                r[j] = mlkem_barrett_reduce(t + r[j + len]);
                 r[j + len] = r[j + len] - t;
                 r[j + len] = fqmul(zeta_val, r[j + len], mode);
             }
@@ -122,9 +122,9 @@ void mlkem_invntt(int16_t r[MLKEM_N], PQC_MODE mode) {
 *              - const int16_t a[2]: 첫 번째 입력 배열
 *              - const int16_t b[2]: 두 번째 입력 배열
 *              - int16_t zeta: 감소 다항식 정의하는 정수
-*              - PQC_MODE mode: 동작 모드 (PQC_MODE_1/2/3 - ML-KEM-512/768/1024)
+*              - int mode: 동작 모드 (int_1/2/3 - ML-KEM-512/768/1024)
 **************************************************/
-void mlkem_basemul(int16_t r[2], const int16_t a[2], const int16_t b[2], int16_t zeta, PQC_MODE mode) {
+void mlkem_basemul(int16_t r[2], const int16_t a[2], const int16_t b[2], int16_t zeta, int mode) {
     // 모드 매개변수는 인터페이스 일관성을 위해 추가
     // ML-KEM 경우 내부적으로는 모든 모드가 동일한 연산 수행
     r[0] = fqmul(a[1], b[1], mode);

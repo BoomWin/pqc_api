@@ -1,7 +1,7 @@
 #ifndef REDUCE_H
 #define REDUCE_H
 
-#include "../include/pqc_params.h"
+#include "../../include/pqc_params.h"
 #include <stdint.h>
 
 /**

@@ -1,7 +1,7 @@
 #ifndef VERIFY_H
 #define VERIFY_H
 
-#include "../include/pqc_params.h"
+#include "../../include/pqc_params.h"
 #include <stddef.h>
 #include <stdint.h>
 

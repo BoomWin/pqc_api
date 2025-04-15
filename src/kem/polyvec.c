@@ -3,10 +3,10 @@
 
 // mlkem_polyvec_compress
 
-void mlkem_polyvec_compress(uint8_t *r, const polyvec *a, PQC_MODE mode) {
+void mlkem_polyvec_compress(uint8_t *r, const polyvec *a, int mode) {
     unsigned int i, j, k;
     uint64_t d0;
-
+    
     if (mode == PQC_MODE_1 || mode == PQC_MODE_2) {
         // ML-KEM-512/768 : 4개씩 처리, 각 10비트
         uint16_t t[4];
@@ -60,7 +60,7 @@ void mlkem_polyvec_compress(uint8_t *r, const polyvec *a, PQC_MODE mode) {
     }
 }
 
-void mlkem_polyvec_decompress(polyvec *r, const uint8_t *a, PQC_MODE mode) {
+void mlkem_polyvec_decompress(polyvec *r, const uint8_t *a, int mode) {
     unsigned int i, j, k;
 
     if (mode == PQC_MODE_1 || mode == PQC_MODE_2) {
@@ -103,7 +103,7 @@ void mlkem_polyvec_decompress(polyvec *r, const uint8_t *a, PQC_MODE mode) {
     }
 }
 
-void mlkem_polyvec_tobytes(uint8_t *r, const polyvec *a, PQC_MODE mode) {
+void mlkem_polyvec_tobytes(uint8_t *r, const polyvec *a, int mode) {
     unsigned int i;
     size_t k;
 
@@ -114,7 +114,7 @@ void mlkem_polyvec_tobytes(uint8_t *r, const polyvec *a, PQC_MODE mode) {
     }
 }
 
-void mlkem_polyvec_frombytes(polyvec *r, const uint8_t *a, PQC_MODE mode) {
+void mlkem_polyvec_frombytes(polyvec *r, const uint8_t *a, int mode) {
     unsigned int i;
     size_t k;
 
@@ -125,7 +125,7 @@ void mlkem_polyvec_frombytes(polyvec *r, const uint8_t *a, PQC_MODE mode) {
     }
 }
 
-void mlkem_polyvec_ntt(polyvec *r, PQC_MODE mode) {
+void mlkem_polyvec_ntt(polyvec *r, int mode) {
     unsigned int i;
     size_t k;
 
@@ -136,7 +136,7 @@ void mlkem_polyvec_ntt(polyvec *r, PQC_MODE mode) {
     }
 }
 
-void mlkem_polyvec_invntt_tomont(polyvec *r, PQC_MODE mode) {
+void mlkem_polyvec_invntt_tomont(polyvec *r, int mode) {
     unsigned int i;
     size_t k;
 
@@ -147,7 +147,7 @@ void mlkem_polyvec_invntt_tomont(polyvec *r, PQC_MODE mode) {
     }
 }
 
-void mlkem_polyvec_basemul_acc_montgomery(poly *r, const polyvec *a, const polyvec *b, PQC_MODE mode) {
+void mlkem_polyvec_basemul_acc_montgomery(poly *r, const polyvec *a, const polyvec *b, int mode) {
     unsigned int i;
     size_t k;
     poly t;
@@ -165,7 +165,7 @@ void mlkem_polyvec_basemul_acc_montgomery(poly *r, const polyvec *a, const polyv
     mlkem_poly_reduce(r, mode);
 }
 
-void mlkem_polyvec_reduce(polyvec *r, PQC_MODE mode) {
+void mlkem_polyvec_reduce(polyvec *r, int mode) {
     unsigned int i;
     size_t k;
 
@@ -176,10 +176,9 @@ void mlkem_polyvec_reduce(polyvec *r, PQC_MODE mode) {
     }
 }
 
-void mlkem_polyvec_add(polyvec *r, const polyvec *a, const polyvec *b, PQC_MODE mode) {
+void mlkem_polyvec_add(polyvec *r, const polyvec *a, const polyvec *b, int mode) {
     unsigned int i;
     size_t k;
-
     k = get_mlkem_k(mode);
 
     for (i = 0; i < k; i++) {

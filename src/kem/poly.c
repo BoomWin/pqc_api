@@ -17,10 +17,10 @@
 *
 * Arguments:   - uint8_t *r: 결과 바이트 배열 포인터
 *              - const poly *a: 입력 다항식 포인터
-*              - PQC_MODE mode: 동작 모드
+*              - int mode: 동작 모드
 **************************************************/
 
-void mlkem_poly_compress(uint8_t *r, const poly *a, PQC_MODE mode) {
+void mlkem_poly_compress(uint8_t *r, const poly *a, int mode) {
     unsigned int i, j;
     int16_t u;
     uint32_t d0;
@@ -84,9 +84,9 @@ void mlkem_poly_compress(uint8_t *r, const poly *a, PQC_MODE mode) {
 *
 * Arguments:   - poly *r: 결과 다항식 포인터
 *              - const uint8_t *a: 입력 바이트 배열 포인터
-*              - PQC_MODE mode: 동작 모드
+*              - int mode: 동작 모드
 **************************************************/
-void mlkem_poly_decompress(poly *r, const uint8_t *a, PQC_MODE mode) {
+void mlkem_poly_decompress(poly *r, const uint8_t *a, int mode) {
     if (mode == PQC_MODE_1 || mode == PQC_MODE_2) { // ML-KEM-512/768
         size_t i;
         for (i = 0; i < MLKEM_N / 2; i++) {
@@ -130,10 +130,10 @@ void mlkem_poly_decompress(poly *r, const uint8_t *a, PQC_MODE mode) {
 *
 * Arguments:   - uint8_t *r: 결과 바이트 배열 포인터
 *              - const poly *a: 입력 다항식 포인터
-*              - PQC_MODE mode: 동작 모드
+*              - int mode: 동작 모드
 **************************************************/
 
-void mlkem_poly_tobytes(uint8_t *r, const poly *a, PQC_MODE mode) {
+void mlkem_poly_tobytes(uint8_t *r, const poly *a, int mode) {
     size_t i;
     uint16_t t0, t1;
     (void)mode; // 모드 함수 에러방지
@@ -158,10 +158,10 @@ void mlkem_poly_tobytes(uint8_t *r, const poly *a, PQC_MODE mode) {
 *
 * Arguments:   - poly *r: 결과 다항식 포인터
 *              - const uint8_t *a: 입력 바이트 배열 포인터
-*              - PQC_MODE mode: 동작 모드
+*              - int mode: 동작 모드
 **************************************************/
 
-void mlkem_poly_frombytes(poly *r, const uint8_t *a, PQC_MODE mode) {
+void mlkem_poly_frombytes(poly *r, const uint8_t *a, int mode) {
     size_t i;
     (void)mode; // 모드 함수 에러방지
 
@@ -179,10 +179,10 @@ void mlkem_poly_frombytes(poly *r, const uint8_t *a, PQC_MODE mode) {
 *
 * Arguments:   - poly *r: 결과 다항식 포인터
 *              - const uint8_t *msg: 입력 메시지 포인터
-*              - PQC_MODE mode: 동작 모드
+*              - int mode: 동작 모드
 **************************************************/
 
-void mlkem_poly_frommsg(poly *r, const uint8_t * msg, PQC_MODE mode) {
+void mlkem_poly_frommsg(poly *r, const uint8_t * msg, int mode) {
     size_t i, j;
     (void)mode; // 모드 함수 에러방지
 
@@ -202,10 +202,10 @@ void mlkem_poly_frommsg(poly *r, const uint8_t * msg, PQC_MODE mode) {
 *
 * Arguments:   - uint8_t *msg: 결과 메시지 포인터
 *              - const poly *a: 입력 다항식 포인터
-*              - PQC_MODE mode: 동작 모드
+*              - int mode: 동작 모드
 **************************************************/
 
-void mlkem_poly_tomsg(uint8_t *msg, const poly *a, PQC_MODE mode) {
+void mlkem_poly_tomsg(uint8_t *msg, const poly *a, int mode) {
     unsigned int i, j;
     uint32_t t; 
     (void)mode; // 모드 함수 에러방지
@@ -234,10 +234,10 @@ void mlkem_poly_tomsg(uint8_t *msg, const poly *a, PQC_MODE mode) {
 * Arguments:   - poly *r: 결과 다항식 포인터
 *              - const uint8_t *seed: 시드 (MLKEM_SYMBYTES 크기)
 *              - uint8_t nonce: 논스 바이트
-*              - PQC_MODE mode: 동작 모드
+*              - int mode: 동작 모드
 **************************************************/
 
-void mlkem_poly_getnoise_eta1(poly *r, const uint8_t *seed, uint8_t nonce, PQC_MODE mode) {
+void mlkem_poly_getnoise_eta1(poly *r, const uint8_t *seed, uint8_t nonce, int mode) {
     // 모드에 따라 eta 1 값을 가져옴 (512 : 3, 768/1024 : 2)
     unsigned int eta1 = get_mlkem_eta1(mode);
 
@@ -260,10 +260,10 @@ void mlkem_poly_getnoise_eta1(poly *r, const uint8_t *seed, uint8_t nonce, PQC_M
 * Arguments:   - poly *r: 결과 다항식 포인터
 *              - const uint8_t *seed: 시드 (MLKEM_SYMBYTES 크기)
 *              - uint8_t nonce: 논스 바이트
-*              - PQC_MODE mode: 동작 모드
+*              - int mode: 동작 모드
 **************************************************/
 
-void mlkem_poly_getnoise_eta2(poly *r, const uint8_t *seed, uint8_t nonce, PQC_MODE mode) {
+void mlkem_poly_getnoise_eta2(poly *r, const uint8_t *seed, uint8_t nonce, int mode) {
     unsigned int eta2 = get_mlkem_eta2(mode);   // 모든 모드에서 2
     uint8_t buf[eta2 * MLKEM_N / 4];
     prf(buf, sizeof(buf), seed, nonce, mode);
@@ -278,9 +278,9 @@ void mlkem_poly_getnoise_eta2(poly *r, const uint8_t *seed, uint8_t nonce, PQC_M
 *              모든 모드에서 동일한 알고리즘 사용
 *
 * Arguments:   - poly *r: 변환할 다항식 포인터
-*              - PQC_MODE mode: 동작 모드
+*              - int mode: 동작 모드
 **************************************************/
-void mlkem_poly_ntt(poly *r, PQC_MODE mode) {
+void mlkem_poly_ntt(poly *r, int mode) {
     mlkem_ntt(r->coeffs, mode);
     mlkem_poly_reduce(r, mode);
 }
@@ -292,9 +292,9 @@ void mlkem_poly_ntt(poly *r, PQC_MODE mode) {
 *              모든 모드에서 동일한 알고리즘 사용
 *
 * Arguments:   - poly *r: 변환할 다항식 포인터
-*              - PQC_MODE mode: 동작 모드
+*              - int mode: 동작 모드
 **************************************************/
-void mlkem_poly_invntt_tomont(poly *r, PQC_MODE mode) {
+void mlkem_poly_invntt_tomont(poly *r, int mode) {
     mlkem_invntt(r->coeffs, mode);
 }
 
@@ -308,9 +308,9 @@ void mlkem_poly_invntt_tomont(poly *r, PQC_MODE mode) {
 * Arguments:   - poly *r: 결과 다항식 포인터
 *              - const poly *a: 첫 번째 입력 다항식 포인터
 *              - const poly *b: 두 번째 입력 다항식 포인터
-*              - PQC_MODE mode: 동작 모드
+*              - int mode: 동작 모드
 **************************************************/
-void mlkem_poly_basemul_montgomery(poly *r, const poly *a, const poly *b, PQC_MODE mode) {
+void mlkem_poly_basemul_montgomery(poly *r, const poly *a, const poly *b, int mode) {
     size_t i;
     
     for (i = 0; i < MLKEM_N / 4; i++) {
@@ -327,9 +327,9 @@ void mlkem_poly_basemul_montgomery(poly *r, const poly *a, const poly *b, PQC_MO
 *              모든 모드에서 동일한 알고리즘 사용
 *
 * Arguments:   - poly *r: 변환할 다항식 포인터
-*              - PQC_MODE mode: 동작 모드
+*              - int mode: 동작 모드
 **************************************************/
-void mlkem_poly_tomont(poly *r, PQC_MODE mode) {
+void mlkem_poly_tomont(poly *r, int mode) {
     size_t i;
     const int16_t f = (1ULL << 32) % MLKEM_Q;
     (void)mode; // 모드 독립적 함수
@@ -348,9 +348,9 @@ void mlkem_poly_tomont(poly *r, PQC_MODE mode) {
 *              모든 모드에서 동일한 알고리즘 사용
 *
 * Arguments:   - poly *r: 리덕션 적용할 다항식 포인터
-*              - PQC_MODE mode: 동작 모드
+*              - int mode: 동작 모드
 **************************************************/
-void mlkem_poly_reduce(poly *r, PQC_MODE mode) {
+void mlkem_poly_reduce(poly *r, int mode) {
     size_t i;
     (void)mode; // 모드 독립적 함수
 
@@ -369,9 +369,9 @@ void mlkem_poly_reduce(poly *r, PQC_MODE mode) {
 * Arguments:   - poly *r: 결과 다항식 포인터
 *              - const poly *a: 첫 번째 입력 다항식 포인터
 *              - const poly *b: 두 번째 입력 다항식 포인터
-*              - PQC_MODE mode: 동작 모드
+*              - int mode: 동작 모드
 **************************************************/
-void mlkem_poly_add(poly *r, const poly *a, const poly *b, PQC_MODE mode) {
+void mlkem_poly_add(poly *r, const poly *a, const poly *b, int mode) {
     size_t i;
     (void)mode; // 모드 독립적 함수
 
@@ -390,9 +390,9 @@ void mlkem_poly_add(poly *r, const poly *a, const poly *b, PQC_MODE mode) {
 * Arguments:   - poly *r: 결과 다항식 포인터
 *              - const poly *a: 첫 번째 입력 다항식 포인터
 *              - const poly *b: 두 번째 입력 다항식 포인터
-*              - PQC_MODE mode: 동작 모드
+*              - int mode: 동작 모드
 **************************************************/
-void mlkem_poly_sub(poly *r, const poly *a, const poly *b, PQC_MODE mode) {
+void mlkem_poly_sub(poly *r, const poly *a, const poly *b, int mode) {
     size_t i;
     (void)mode; // 모드 독립적 함수
 

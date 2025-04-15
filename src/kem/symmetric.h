@@ -2,7 +2,7 @@
 #define SYMMETRIC_H
 
 #include "../common/fips202.h"
-#include "../include/pqc_params.h"
+#include "../../include/pqc_params.h"
 #include <stddef.h>
 #include <stdint.h>
 
@@ -18,14 +18,14 @@ typedef shake128ctx xof_state;
  * @param seed 시드 값 (MLKEM_SYMBYTES 크기)
  * @param x 첫 번째 입력 바이트
  * @param y 두 번째 입력 바이트
- * @param mode 동작 모드 (PQC_MODE_1/2/3 - ML-KEM-512/768/1024)
+ * @param mode 동작 모드 (int_1/2/3 - ML-KEM-512/768/1024)
  */
 
 void mlkem_shake128_absorb(xof_state *s,
                             const uint8_t seed[MLKEM_SYMBYTES],
                             uint8_t x,
                             uint8_t y,
-                            PQC_MODE mode);
+                            int mode);
 
                          
 /**
@@ -34,14 +34,14 @@ void mlkem_shake128_absorb(xof_state *s,
  * @param outlen 출력 버퍼 길이
  * @param key 키 값 (MLKEM_SYMBYTES 크기)
  * @param nonce 일회용 값
- * @param mode 동작 모드 (PQC_MODE_1/2/3 - ML-KEM-512/768/1024)
+ * @param mode 동작 모드 (int_1/2/3 - ML-KEM-512/768/1024)
  */
 
 void mlkem_shake256_prf(uint8_t *out,
                         size_t outlen,
                         const uint8_t key[MLKEM_SYMBYTES],
                         uint8_t nonce,
-                        PQC_MODE mode);
+                        int mode);
 
 
  /**
@@ -49,13 +49,13 @@ void mlkem_shake256_prf(uint8_t *out,
  * @param out 출력 버퍼 (모드에 따른 MLKEM_SSBYTES 크기)
  * @param key 키 값 (MLKEM_SYMBYTES 크기)
  * @param input 입력 값 (모드에 따른 MLKEM_CIPHERTEXTBYTES 크기)
- * @param mode 동작 모드 (PQC_MODE_1/2/3 - ML-KEM-512/768/1024)
+ * @param mode 동작 모드 (int_1/2/3 - ML-KEM-512/768/1024)
  */           
 
 void mlkem_shake256_rkprf(uint8_t *out,
                         const uint8_t key[MLKEM_SYMBYTES],
                         const uint8_t *input,
-                        PQC_MODE mode);
+                        int mode);
                         
 
 /**

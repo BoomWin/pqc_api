@@ -11,23 +11,9 @@ typedef enum {
     PQC_ALG_SPHINCS // SPHINCS+
 } PQC_ALGORITHM;
 
-// 보안 레벨 정의
-typedef enum {
-    // ML 보안 레벨
-    PQC_MODE_1, //  ML-KEM-512, ML-DSA-44,
-    PQC_MODE_2, // ML-KEM-768, ML-DSA-65
-    PQC_MODE_3, // ML-KEM-1024, ML-DSA-87
-    // SPHINCS+ 보안 레벨
-    // SHA-2 기반
-    PQC_MODE_4, // SPHINCS+-SHA2-128f
-    PQC_MODE_5, // SPHINCS+-SHA2-128s
-    PQC_MODE_6, // SPHINCS+-SHA2-192f
-    PQC_MODE_7, // SPHINCS+-SHA2-192s
-
-    // SHAKE 기반
-
-    // MODE 추가 구현 부분은 여기 정의
-} PQC_MODE;
+#define PQC_MODE_1 0 // Ml-KEM 512
+#define PQC_MODE_2 1 // Ml-KEM 768
+#define PQC_MODE_3 2 // Ml-KEM 1024
 
 
 /* Common ML-KEM parameters */
