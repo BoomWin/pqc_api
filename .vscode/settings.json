@@ -3,6 +3,16 @@
         "api.h": "c",
         "randombytes.h": "c",
         "symmetric.h": "c",
-        "ml_crypto.h": "c"
+        "ml_crypto.h": "c",
+        "cbd.h": "c",
+        "kem.h": "c",
+        "stdint.h": "c",
+        "ntt.h": "c",
+        "polyvec.h": "c",
+        "pqc_params.h": "c",
+        "stddef.h": "c",
+        "fips202.h": "c",
+        "poly.h": "c",
+        "get_func.h": "c"
     }
 }
